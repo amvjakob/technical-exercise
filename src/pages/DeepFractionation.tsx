@@ -55,7 +55,7 @@ const DeepFractionation = () => {
       },
     },
     { field: 'pos_b', headerName: 'Residue index B', minWidth: 100, flex: 1 },
-    { field: 'fraction', headerName: 'Chrom. fraction identifier', minWidth: 100, flex: 1 },
+    { field: 'fraction', headerName: 'Chromatographic fraction identifier', minWidth: 100, flex: 1 },
     { field: 'fdr', headerName: 'False discovery rate', minWidth: 100, flex: 1 },
 
     /*

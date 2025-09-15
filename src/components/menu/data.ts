@@ -61,15 +61,4 @@ export const menu = [
   
     ],
   },
-  {
-    catalog: 'Misc',
-    listItems: [
-      {
-        isLink: true,
-        url: '/charts',
-        icon: HiOutlinePresentationChartBar,
-        label: 'charts',
-      },
-    ],
-  },
 ];

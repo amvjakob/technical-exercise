@@ -63,8 +63,6 @@ function App() {
           path: '/screening',
           element: <Screening />,
         },
-        
-
         {
           path: '/calendar',
           element: <Calendar />,

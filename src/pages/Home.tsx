@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
   getDataAggregate,
 } from '../api/ApiCollection';
-import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 
 
@@ -78,7 +78,7 @@ const Home = () => {
   const dataChartByType = Object.values(rawDataGrouped).flatMap(aggregateToMonthYear);
 
   const dataChartGrouped = groupBy(dataChartByType, 'year_month');
-  const dataChart = Object.values(dataChartGrouped).flatMap((items: any) => {
+  let dataChart = Object.values(dataChartGrouped).flatMap((items: any) => {
     const namedItems = items.map((item: any) => { 
       let newObj = {};
       for (const key in item) {
@@ -104,30 +104,55 @@ const Home = () => {
     }
   });
 
+  // add more data
+  dataChart = dataChart.map((item: any) => {
+    return { ...item, 
+      cost_per_ppi: item.ppis_identified && item.ppis_identified !== 0 ? Math.round(item.cost_per_run / item.ppis_identified * 100) / 100 : 0,
+      "cost_per_ppi_Deep Fractionation": item["ppis_identified_Deep Fractionation"] && item["ppis_identified_Deep Fractionation"] !== 0 ? Math.round(item["cost_per_run_Deep Fractionation"] / item["ppis_identified_Deep Fractionation"] * 100) / 100 : 0,
+      "cost_per_ppi_XLMS Screening": item["ppis_identified_XLMS Screening"] && item["ppis_identified_XLMS Screening"] !== 0 ? Math.round(item["cost_per_run_XLMS Screening"] / item["ppis_identified_XLMS Screening"] * 100) / 100 : 0,
+
+      ppi_per_ms_hour: item.ms_hours_used && item.ms_hours_used !== 0 ? Math.round(item.ppis_identified / item.ms_hours_used * 100) / 100 : 0,
+      "ppi_per_ms_hour_Deep Fractionation": item["ms_hours_used_Deep Fractionation"] && item["ms_hours_used_Deep Fractionation"] !== 0 ? Math.round(item["ppis_identified_Deep Fractionation"] / item["ms_hours_used_Deep Fractionation"] * 100) / 100 : 0,
+      "ppi_per_ms_hour_XLMS Screening": item["ms_hours_used_XLMS Screening"] && item["ms_hours_used_XLMS Screening"] !== 0 ? Math.round(item["ppis_identified_XLMS Screening"] / item["ms_hours_used_XLMS Screening"] * 100) / 100 : 0,
+
+      "compounds_per_ms_hour_XLMS Screening": item["ms_hours_used_XLMS Screening"] && item["ms_hours_used_XLMS Screening"] !== 0 ? Math.round(item["compounds_screened_XLMS Screening"] / item["ms_hours_used_XLMS Screening"] * 100) / 100 : 0,
+
+      "cost_per_compound_XLMS Screening": item["compounds_screened_XLMS Screening"] && item["compounds_screened_XLMS Screening"] !== 0 ? Math.round(item["cost_per_run_XLMS Screening"] / item["compounds_screened_XLMS Screening"] * 100) / 100 : 0,
+
+      cost_k: item.cost_per_run ? Math.round(item.cost_per_run / 1000 * 100) / 100 : 0,
+      "cost_k_Deep Fractionation": item["cost_per_run_Deep Fractionation"] ? Math.round(item["cost_per_run_Deep Fractionation"] / 1000 * 100) / 100 : 0,
+      "cost_k_XLMS Screening": item["cost_per_run_XLMS Screening"] ? Math.round(item["cost_per_run_XLMS Screening"] / 1000 * 100) / 100 : 0,
+    }
+  });
+
   //console.log('dataChart', dataChart);
 
   return (
     // screen
     <div className="home w-full p-0 m-0">
+
+      <h1 className='text-4xl font-bold mb-2'>Raw metrics</h1>
+      <hr></hr>
+
       {/* grid */}
-      <div className="w-full grid grid-cols-1 xl:grid-cols-2 grid-flow-dense auto-rows-[minmax(200px,auto)] xl:auto-rows-[minmax(150px,auto)] gap-3 xl:gap-3 px-0">
+      <div className="w-full grid grid-cols-1 xl:grid-cols-2 3xl:grid-cols-3 grid-flow-dense auto-rows-[minmax(200px,auto)] xl:auto-rows-[minmax(150px,auto)] gap-9 px-0 mt-4">
 
-        <div className="box row-span-2 col-span-full sm:col-span-1 xl:col-span-1 3xl:row-span-2">
+        <div className="box col-span-full sm:col-span-1 xl:col-span-1 ">
           <div className="w-full h-full p-0 m-0 flex flex-col items-start gap-4 xl:gap-7 justify-between">
-            <span className="text-2xl xl:text-2xl 2xl:text-4xl font-bold">
-              Total costs
+            <span className="text-2xl xl:text-2xl 2xl:text-4xl">
+              <span className='font-bold'>Total run costs</span>, k$ / month
             </span>
 
             <div className="flex xl:flex-col 2xl:flex-row gap-2 xl:gap-2 items-end xl:items-end 2xl:items-center">
-                <span
-                  className={`text-2xl xl:text-xl 2xl:text-3xl font-bold`}
-                >
-                  $ {dataChart.flatMap(item => item.cost_per_run).reduce((a, b) => a + b, 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
-                </span>
-                <span className="font-medium xl:text-sm 2xl:text-base">
-                  YTD
-                </span>
-              </div>
+              <span
+                className={`text-2xl xl:text-xl 2xl:text-3xl font-bold`}
+              >
+                $ {dataChart.flatMap(item => item.cost_k).reduce((a, b) => a + b, 0).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}k
+              </span>
+              <span className="font-medium xl:text-sm 2xl:text-base">
+                YTD
+              </span>
+            </div>
 
             <div className="w-full min-h-[300px] 2xl:min-h-[360px] 3xl:min-h-[420px]">
 
@@ -135,12 +160,12 @@ const Home = () => {
                 <LineChart data={dataChart}>
                   <CartesianGrid stroke="#eee" strokeDasharray="5 5"/>
                   <XAxis dataKey="year_month" />
-                  <YAxis />
+                  <YAxis label={{ value: 'Cost (k$)', angle: -90, offset: 10, position: 'insideBottomLeft' }} />
                   <Tooltip />
-                  <Line type="monotone" dataKey="cost_per_run" stroke="#777" strokeWidth={2} name="Total"/>
-                  <Line type="monotone" dataKey="cost_per_run_Deep Fractionation" stroke="#82ca9d" strokeWidth={2} name="Deep Fractionation"/>
-                  <Line type="monotone" dataKey="cost_per_run_XLMS Screening" stroke="#8884d8" strokeWidth={2} name="XLMS Screening"/>
-                  <Legend align="right" />
+                  <Line type="monotone" dataKey="cost_k" stroke="#333" strokeWidth={2} name="Total"/>
+                  <Line type="monotone" dataKey="cost_k_Deep Fractionation" stroke="#2980b9" strokeWidth={2} name="Deep Fractionation"/>
+                  <Line type="monotone" dataKey="cost_k_XLMS Screening" stroke="#e67e22" strokeWidth={2} name="XLMS Screening"/>
+                  <Legend align="right" verticalAlign="top" />
                 </LineChart>
               </ResponsiveContainer>
             
@@ -160,17 +185,17 @@ const Home = () => {
         </div>
 
 
-        <div className="box row-span-2 col-span-full sm:col-span-1 xl:col-span-1 3xl:row-span-2">
+        <div className="box col-span-full sm:col-span-1 xl:col-span-1">
           <div className="w-full h-full p-0 m-0 flex flex-col items-start gap-4 xl:gap-7 justify-between">
-            <span className="text-2xl xl:text-2xl 2xl:text-4xl font-bold">
-              Total MS hours
+            <span className="text-2xl xl:text-2xl 2xl:text-4xl">
+              <span className='font-bold'>Instrument time</span>, MS hours / month
             </span>
 
             <div className="flex xl:flex-col 2xl:flex-row gap-2 xl:gap-2 items-end xl:items-end 2xl:items-center">
                 <span
                   className={`text-2xl xl:text-xl 2xl:text-3xl font-bold`}
                 >
-                  {dataChart.flatMap(item => item.ms_hours_used).reduce((a, b) => a + b, 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                  {dataChart.flatMap(item => item.ms_hours_used).reduce((a, b) => a + b, 0).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
                 </span>
                 <span className="font-medium xl:text-sm 2xl:text-base">
                   YTD
@@ -180,16 +205,16 @@ const Home = () => {
             <div className="w-full min-h-[300px] 2xl:min-h-[360px] 3xl:min-h-[420px]">
 
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={dataChart}>
+                <AreaChart data={dataChart}>
                   <CartesianGrid stroke="#eee" strokeDasharray="5 5"/>
                   <XAxis dataKey="year_month" />
-                  <YAxis />
+                  <YAxis label={{ value: 'Instrument time (MS h)', angle: -90, offset: 10, position: 'insideBottomLeft' }} />
                   <Tooltip />
-                  <Line type="monotone" dataKey="ms_hours_used" stroke="#777" strokeWidth={2} name="Total"/>
-                  <Line type="monotone" dataKey="ms_hours_used_Deep Fractionation" stroke="#82ca9d" strokeWidth={2} name="Deep Fractionation"/>
-                  <Line type="monotone" dataKey="ms_hours_used_XLMS Screening" stroke="#8884d8" strokeWidth={2} name="XLMS Screening"/>
-                  <Legend align="right" />
-                </LineChart>
+                  <Area type="monotone" dataKey="ms_hours_used" stroke="#333" fill="#fff" stackId={2} name="Total"/>
+                  <Area type="monotone" dataKey="ms_hours_used_Deep Fractionation" stroke="#2980b9" fill="#2980b9" name="Deep Fractionation" stackId={1} />
+                  <Area type="monotone" dataKey="ms_hours_used_XLMS Screening" stroke="#e67e22" fill="#e67e22" name="XLMS Screening" stackId={1} />
+                  <Legend align="right" verticalAlign="top" />
+                </AreaChart>
               </ResponsiveContainer>
             
             </div>
@@ -208,17 +233,17 @@ const Home = () => {
         </div>
 
 
-        <div className="box row-span-2 col-span-full sm:col-span-1 xl:col-span-1 3xl:row-span-2">
+        <div className="box col-span-full sm:col-span-1 xl:col-span-1">
           <div className="w-full h-full p-0 m-0 flex flex-col items-start gap-4 xl:gap-7 justify-between">
-            <span className="text-2xl xl:text-2xl 2xl:text-4xl font-bold">
-              Total PPIs identified
+            <span className="text-2xl xl:text-2xl 2xl:text-4xl">
+              <span className='font-bold'>Unique PPIs detected</span>, # / month
             </span>
 
             <div className="flex xl:flex-col 2xl:flex-row gap-2 xl:gap-2 items-end xl:items-end 2xl:items-center">
                 <span
                   className={`text-2xl xl:text-xl 2xl:text-3xl font-bold`}
                 >
-                  {dataChart.flatMap(item => item.ppis_identified).reduce((a, b) => a + b, 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                  {dataChart.flatMap(item => item.ppis_identified).reduce((a, b) => a + b, 0).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
                 </span>
                 <span className="font-medium xl:text-sm 2xl:text-base">
                   YTD
@@ -228,16 +253,16 @@ const Home = () => {
             <div className="w-full min-h-[300px] 2xl:min-h-[360px] 3xl:min-h-[420px]">
 
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={dataChart}>
+                <AreaChart data={dataChart}>
                   <CartesianGrid stroke="#eee" strokeDasharray="5 5"/>
                   <XAxis dataKey="year_month" />
-                  <YAxis />
+                  <YAxis label={{ value: 'Unique PPIs (#)', angle: -90, offset: 8, position: 'insideBottomLeft' }} />
                   <Tooltip />
-                  <Line type="monotone" dataKey="ppis_identified" stroke="#777" strokeWidth={2} name="Total"/>
-                  <Line type="monotone" dataKey="ppis_identified_Deep Fractionation" stroke="#82ca9d" strokeWidth={2} name="Deep Fractionation"/>
-                  <Line type="monotone" dataKey="ppis_identified_XLMS Screening" stroke="#8884d8" strokeWidth={2} name="XLMS Screening"/>
-                  <Legend align="right" />
-                </LineChart>
+                  <Area type="monotone" dataKey="ppis_identified" stroke="#333" fill="#fff" name="Total" stackId={2} />
+                  <Area type="monotone" dataKey="ppis_identified_Deep Fractionation" stroke="#2980b9" fill="#2980b9" name="Deep Fractionation" stackId={1} />
+                  <Area type="monotone" dataKey="ppis_identified_XLMS Screening" stroke="#e67e22" fill="#e67e22" name="XLMS Screening" stackId={1} />
+                  <Legend align="right" verticalAlign="top" />
+                </AreaChart>
               </ResponsiveContainer>
             
             </div>
@@ -255,19 +280,17 @@ const Home = () => {
           </div>
         </div>
 
-
-
-        <div className="box row-span-2 col-span-full sm:col-span-1 xl:col-span-1 3xl:row-span-2">
+        <div className="box col-span-full sm:col-span-1 xl:col-span-1">
           <div className="w-full h-full p-0 m-0 flex flex-col items-start gap-4 xl:gap-7 justify-between">
-            <span className="text-2xl xl:text-2xl 2xl:text-4xl font-bold">
-              Total compounds screened
+            <span className="text-2xl xl:text-2xl 2xl:text-4xl">
+              <span className='font-bold'>Compounds screened</span>, # / month
             </span>
 
             <div className="flex xl:flex-col 2xl:flex-row gap-2 xl:gap-2 items-end xl:items-end 2xl:items-center">
                 <span
                   className={`text-2xl xl:text-xl 2xl:text-3xl font-bold`}
                 >
-                  {dataChart.flatMap(item => item.compounds_screened).reduce((a, b) => a + b, 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                  {dataChart.flatMap(item => item.compounds_screened).reduce((a, b) => a + b, 0).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
                 </span>
                 <span className="font-medium xl:text-sm 2xl:text-base">
                   YTD
@@ -280,10 +303,10 @@ const Home = () => {
                 <BarChart data={dataChart}>
                   <CartesianGrid stroke="#eee" strokeDasharray="5 5"/>
                   <XAxis dataKey="year_month" />
-                  <YAxis />
+                  <YAxis label={{ value: 'Compounds (#)', angle: -90, offset:10, position: 'insideBottomLeft' }} />
                   <Tooltip />
-                  <Bar  dataKey="compounds_screened_XLMS Screening" fill="#8884d8" name="XLMS Screening"/>
-                  <Legend align="right" />
+                  <Bar  dataKey="compounds_screened_XLMS Screening" fill="#e67e22" name="XLMS Screening"/>
+                  <Legend align="right" verticalAlign="top" />
                 </BarChart>
               </ResponsiveContainer>
             
@@ -298,6 +321,118 @@ const Home = () => {
                 </a>
               </div>              
             </div>
+          </div>
+        </div>
+
+       
+      </div>
+
+
+      <h1 className='text-4xl font-bold mb-2 mt-8'>Computed metrics</h1>
+      <hr></hr>
+
+      {/* grid */}
+      <div className="w-full grid grid-cols-1 xl:grid-cols-2 3xl:grid-cols-3 grid-flow-dense auto-rows-[minmax(200px,auto)] xl:auto-rows-[minmax(150px,auto)] gap-9 px-0 mt-4">
+
+        <div className="box col-span-full sm:col-span-1 xl:col-span-1">
+          <div className="w-full h-full p-0 m-0 flex flex-col items-start gap-4 xl:gap-7 justify-between">
+            <span className="text-2xl xl:text-2xl 2xl:text-4xl">
+              <span className='font-bold'>Cost per identified PPI</span>, $ / #
+            </span>
+
+            <div className="w-full min-h-[300px] 2xl:min-h-[360px] 3xl:min-h-[420px]">
+
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={dataChart}>
+                  <CartesianGrid stroke="#eee" strokeDasharray="5 5"/>
+                  <XAxis dataKey="year_month" />
+                  <YAxis label={{ value: 'Cost per identified PPI ($)', angle: -90, offset: 10, position: 'insideBottomLeft' }} />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="cost_per_ppi" stroke="#333" strokeWidth={2} name="Average"/>
+                  <Line type="monotone" dataKey="cost_per_ppi_Deep Fractionation" stroke="#2980b9" strokeWidth={2} name="Deep Fractionation"/>
+                  <Line type="monotone" dataKey="cost_per_ppi_XLMS Screening" stroke="#e67e22" strokeWidth={2} name="XLMS Screening"/>
+                  <Legend align="right" verticalAlign="top" />
+                </LineChart>
+              </ResponsiveContainer>
+            
+            </div>
+    
+          </div>
+        </div>
+
+
+        <div className="box col-span-full sm:col-span-1 xl:col-span-1">
+          <div className="w-full h-full p-0 m-0 flex flex-col items-start gap-4 xl:gap-7 justify-between">
+            <span className="text-2xl xl:text-2xl 2xl:text-4xl">
+              <span className='font-bold'>Detected PPIs per instrument time</span>, # / hour
+            </span>
+
+            <div className="w-full min-h-[300px] 2xl:min-h-[360px] 3xl:min-h-[420px]">
+
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={dataChart}>
+                  <CartesianGrid stroke="#eee" strokeDasharray="5 5"/>
+                  <XAxis dataKey="year_month" />
+                  <YAxis label={{ value: 'PPIs (#)', angle: -90, offset: 10, position: 'insideBottomLeft' }} />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="ppi_per_ms_hour" stroke="#333" strokeWidth={2} name="Average"/>
+                  <Line type="monotone" dataKey="ppi_per_ms_hour_Deep Fractionation" stroke="#2980b9" strokeWidth={2} name="Deep Fractionation"/>
+                  <Line type="monotone" dataKey="ppi_per_ms_hour_XLMS Screening" stroke="#e67e22" strokeWidth={2} name="XLMS Screening"/>
+                  <Legend align="right" verticalAlign="top" />
+                </LineChart>
+              </ResponsiveContainer>
+            
+            </div>
+    
+          </div>
+        </div>
+
+
+        <div className="box col-span-full sm:col-span-1 xl:col-span-1">
+          <div className="w-full h-full p-0 m-0 flex flex-col items-start gap-4 xl:gap-7 justify-between">
+            <span className="text-2xl xl:text-2xl 2xl:text-4xl">
+              <span className='font-bold'>Compounds screened per instrument time</span>, # / hour
+            </span>
+
+            <div className="w-full min-h-[300px] 2xl:min-h-[360px] 3xl:min-h-[420px]">
+
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={dataChart}>
+                  <CartesianGrid stroke="#eee" strokeDasharray="5 5"/>
+                  <XAxis dataKey="year_month" />
+                  <YAxis label={{ value: 'Compounds (#)', angle: -90, offset: 10, position: 'insideBottomLeft' }} />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="compounds_per_ms_hour_XLMS Screening" stroke="#e67e22" strokeWidth={2} name="XLMS Screening"/>
+                  <Legend align="right" verticalAlign="top" />
+                </LineChart>
+              </ResponsiveContainer>
+            
+            </div>
+    
+          </div>
+        </div>
+
+        <div className="box col-span-full sm:col-span-1 xl:col-span-1">
+          <div className="w-full h-full p-0 m-0 flex flex-col items-start gap-4 xl:gap-7 justify-between">
+            <span className="text-2xl xl:text-2xl 2xl:text-4xl">
+              <span className='font-bold'>Cost per screened compound</span>, $ / #
+            </span>
+
+            <div className="w-full min-h-[300px] 2xl:min-h-[360px] 3xl:min-h-[420px]">
+
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={dataChart}>
+                  <CartesianGrid stroke="#eee" strokeDasharray="5 5"/>
+                  <XAxis dataKey="year_month" />
+                  <YAxis label={{ value: 'Cost per screened compound ($)', angle: -90, offset: 10, position: 'insideBottomLeft' }} />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="cost_per_compound_XLMS Screening" stroke="#e67e22" strokeWidth={2} name="XLMS Screening"/>
+                  <Legend align="right" verticalAlign="top" />
+                </LineChart>
+              </ResponsiveContainer>
+            
+            </div>
+    
           </div>
         </div>
 
