@@ -3,7 +3,6 @@ import {
   HiOutlineHome,
   HiOutlineCube,
   HiOutlineCalendarDays,
-  HiOutlinePresentationChartBar,
   HiOutlineDocumentText,
 } from 'react-icons/hi2';
 // import { IoSettingsOutline } from 'react-icons/io5';

@@ -1,6 +1,4 @@
-import axios from 'axios';
 import { read, utils } from "xlsx";
-
 
 export const readExcelData = async () => {
   try {
