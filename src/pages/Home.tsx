@@ -9,7 +9,7 @@ import { Area, AreaChart, Bar, BarChart, CartesianGrid, Legend, Line, LineChart,
 
 type ObjectKey = string | number | symbol
 
-export const groupBy = <
+const groupBy = <
   K extends ObjectKey,
   TItem extends Record<K, ObjectKey>
 >(
