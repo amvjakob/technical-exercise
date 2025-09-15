@@ -4,7 +4,7 @@ import { read, utils } from "xlsx";
 
 export const readExcelData = async () => {
   try {
-    const path = "https://technical-exercise.vercel.app/data";
+    const path = "https://technical-exercise-aj.vercel.app/data";
     // const path = 'http://localhost:5173/data';
     const filename = 'TechEx_Anthony_Jakob_DummyData.xlsx';
 
