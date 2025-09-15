@@ -6,7 +6,7 @@ export const readExcelData = async () => {
     // const path = 'http://localhost:5173/data';
     const filename = 'TechEx_Anthony_Jakob_DummyData.xlsx';
 
-    console.log('fetching data from', `${path}/${filename}`);
+    // console.log('fetching data from', `${path}/${filename}`);
 
     return await fetch(`${path}/${filename}`)
       // Take the response and turn the data into an array buffer
@@ -40,7 +40,7 @@ export const readExcelData = async () => {
           });
           data.push(sheetWithId);
         }
-        console.log(data);
+        //console.log(data);
         return data;
       })
       .catch(err => console.error(err));    
