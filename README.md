@@ -2,6 +2,10 @@
 
 Forked from [React Admin UI](https://github.com/fransachmadhw/React-Admin-UI-V1).
 
+The live app can be accessed at [https://technical-exercise-aj.vercel.app/](https://technical-exercise-aj.vercel.app/).
+
+## Running the project locally
+
 Install all dependencies listed in `package.json`.
 
 ```bash
